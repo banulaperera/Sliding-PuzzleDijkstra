@@ -1,14 +1,14 @@
 /*
-    * Name: Banula Perera
-    * IIT ID: 20212085
-    * UoW ID: W1871527
-    * -------------------------References-------------------------
-    * https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
-    * https://www.javatpoint.com/shortest-path-in-a-binary-maze-in-java#
-    * https://www.youtube.com/watch?v=t2d-XYuPfg0
-    * https://www.youtube.com/watch?v=SZXXnB7vSm4
-    * https://introcs.cs.princeton.edu/java/11style/
-    * -----------------------------------------------------------
+ * Name: Banula Perera
+ * IIT ID: 20212085
+ * UoW ID: W1871527
+ * -------------------------References-------------------------
+ * https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+ * https://www.javatpoint.com/shortest-path-in-a-binary-maze-in-java#
+ * https://www.youtube.com/watch?v=t2d-XYuPfg0
+ * https://www.youtube.com/watch?v=SZXXnB7vSm4
+ * https://introcs.cs.princeton.edu/java/11style/
+ * -----------------------------------------------------------
  */
 
 import java.io.BufferedReader;
@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.util.*;
 
 public class Main {
-    private static final int[][] DIRECTIONS = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}; // Right, Left, Down, Up directions respectively.
+    private static final int[][] DIRECTIONS = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}; // Up, Down, Right, Left directions respectively.
 
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
@@ -85,24 +85,23 @@ public class Main {
     }
 
     /*
-        * Dijkstra's algorithm to find the shortest path from the start to the finish.
-        * @param maze The maze to traverse.
-        * @param startX The x-coordinate of the starting point.
-        * @param startY The y-coordinate of the starting point.
-        * @param finishX The x-coordinate of the finish point.
-        * @param finishY The y-coordinate of the finish point.
-        * print the path from start to finish and time taken to execute the algorithm.
+     * Dijkstra's algorithm to find the shortest path from the start to the finish.
+     * @param maze The maze to traverse.
+     * @param startX The x-coordinate of the starting point.
+     * @param startY The y-coordinate of the starting point.
+     * @param finishX The x-coordinate of the finish point.
+     * @param finishY The y-coordinate of the finish point.
+     * print the path from start to finish and time taken to execute the algorithm.
      */
     public static void dijkstra(String[][] maze, int startX, int startY, int finishX, int finishY) {
         Instant start = Instant.now(); // Get the start time to execute the Dijkstra's algorithm.
         Node[][] nodes = new Node[maze.length][maze[0].length];
 
         // Initialize the nodes by removing the wall '0'.
+        // Initialize the nodes by removing the wall '0'.
         for (int y = 0; y < maze.length; y++) {
             for (int x = 0; x < maze[0].length; x++) {
-                if (!Objects.equals(maze[y][x], "0")) {
-                    nodes[y][x] = new Node(x, y, Integer.MAX_VALUE, null);
-                }
+                nodes[y][x] = new Node(x, y, Integer.MAX_VALUE, null, maze[y][x].equals("0"));
             }
         }
 
@@ -135,9 +134,10 @@ public class Main {
                 path.add(current);
                 current = current.previous;
             }
+            Instant end = Instant.now(); // Get the end time to execute the Dijkstra's algorithm.
             Collections.reverse(path); // Reverse the path to get the path from the start to the finish.
             printPath(path);
-            Instant end = Instant.now(); // Get the end time to execute the Dijkstra's algorithm.
+            visualPath(path, maze);
             System.out.println("\nTime taken to execute the algorithm: " + (end.toEpochMilli() - start.toEpochMilli()) + " milliseconds."); // Print the time taken to execute the algorithm.
         } else {
             System.out.println("No path found.");
@@ -145,48 +145,84 @@ public class Main {
     }
 
     /*
-        * Get the neighbors of the current node.
-        * @param node The current node.
-        * @param nodes The nodes in the maze.
-        * @return The neighbors of the current node.
+     * Get the neighbors of the current node.
+     * @param node The current node.
+     * @param nodes The nodes in the maze.
+     * @return The neighbors of the current node.
      */
     public static List<Node> getNeighbors(Node node, Node[][] nodes) {
         List<Node> neighbors = new ArrayList<>();
 
-        // Get the neighbors of the current node.
         for (int[] direction : DIRECTIONS) {
-            int x = node.x + direction[0];
-            int y = node.y + direction[1];
-            if (x >= 0 && x < nodes[0].length && y >= 0 && y < nodes.length && nodes[y][x] != null) {
+            int x = node.x;
+            int y = node.y;
+
+            // Keep sliding in the chosen direction until hitting a wall or a rock.
+            while (true) {
+                int newX = x + direction[0];
+                int newY = y + direction[1];
+
+                // Break if the new position is out of bounds or is a rock.
+                if (newX < 0 || newX >= nodes[0].length || newY < 0 || newY >= nodes.length || nodes[newY][newX].isRock) {
+                    break;
+                }
+
+                x = newX;
+                y = newY;
+            }
+
+            // Add the final position to the neighbors.
+            if (x != node.x || y != node.y) {
                 neighbors.add(nodes[y][x]);
             }
         }
+
         return neighbors;
     }
 
     /*
-        * Print the path from the start to the finish.
-        * @param path The path from the start to the finish.
+     * Print the path from the start to the finish.
+     * @param path The path from the start to the finish.
      */
     public static void printPath(List<Node> path) {
         // Print the path from the start to the finish.
         for (int i = 0; i < path.size(); i++) {
             if (i == 0) {
-                System.out.println("\n" + (i + 1) + ". Start at (" + (path.get(i).y + 1) + "," + (path.get(i).x + 1) + ")");
+                System.out.println("\n" + (i + 1) + ". Start at (" + (path.get(i).x + 1) + "," + (path.get(i).y + 1) + ")");
             } else {
                 Node current = path.get(i);
                 Node previous = path.get(i - 1);
                 if (current.x < previous.x) {
-                    System.out.println((i + 1) + ". Move left to (" + (current.y + 1) + "," + (current.x + 1) + ")");
+                    System.out.println((i + 1) + ". Move left to (" + (current.x + 1) + "," + (current.y + 1) + ")");
                 } else if (current.x > previous.x) {
-                    System.out.println((i + 1) + ". Move right to (" + (current.y + 1) + "," + (current.x + 1) + ")");
+                    System.out.println((i + 1) + ". Move right to (" + (current.x + 1) + "," + (current.y + 1) + ")");
                 } else if (current.y < previous.y) {
-                    System.out.println((i + 1) + ". Move up to (" + (current.y + 1) + "," + (current.x + 1) + ")");
+                    System.out.println((i + 1) + ". Move up to (" + (current.x + 1) + "," + (current.y + 1) + ")");
                 } else if (current.y > previous.y) {
-                    System.out.println((i + 1) + ". Move down to (" + (current.y + 1) + "," + (current.x + 1) + ")");
+                    System.out.println((i + 1) + ". Move down to (" + (current.x + 1) + "," + (current.y + 1) + ")");
                 }
             }
         }
         System.out.println("Done!");
+        System.out.println("\n");
+    }
+
+    public static void visualPath(List<Node> path, String[][] maze) {
+        int i = 1;
+        // Mark the path in the maze.
+        for (Node node : path) {
+            if (maze[node.y][node.x].equals(".") || maze[node.y][node.x].equals("0")) {
+                maze[node.y][node.x] = String.valueOf(i);
+                i++;
+            }
+        }
+
+        // Print the maze with the path.
+        for (String[] row : maze) {
+            for (String cell : row) {
+                System.out.print(cell);
+            }
+            System.out.println();
+        }
     }
 }
