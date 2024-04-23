@@ -238,7 +238,8 @@ public class Main {
         // Print the path from the start to the finish.
         for (int i = 0; i < path.size(); i++) {
             if (i == 0) {
-                System.out.println("\n" + (i + 1) + ". Start at (" + (path.get(i).x + 1) + "," + (path.get(i).y + 1) + ")");
+                System.out.println("\n*********** Path from the start to the finish ***********");
+                System.out.println((i + 1) + ". Start at (" + (path.get(i).x + 1) + "," + (path.get(i).y + 1) + ")");
             } else {
                 Node current = path.get(i);
                 Node previous = path.get(i - 1);
@@ -254,6 +255,7 @@ public class Main {
             }
         }
         System.out.println("Done!");
+        System.out.println("**********************************************************");
     }
 
     /**
@@ -269,7 +271,7 @@ public class Main {
                 maze[node.y][node.x] = "*";
             }
         }
-
+        System.out.println("\n*********** Visual traveled path of the maze ***********");
         // Print the maze with the path.
         for (String[] row : maze) {
             for (String cell : row) {
@@ -277,5 +279,6 @@ public class Main {
             }
             System.out.println();
         }
+        System.out.println("**********************************************************");
     }
 }
