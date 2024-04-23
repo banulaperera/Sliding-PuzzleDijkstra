@@ -19,6 +19,24 @@ import java.util.*;
 
 /**
  * The Main class contains the main method to execute the Sliding Puzzle Game.
+ * <p>
+ * The Sliding Puzzle Game is a game where the player has to find the shortest path from the start point "S" to the finish point "F".
+ * <p>
+ * The player can move in four directions: Up, Down, Right, and Left.
+ * <p>
+ * The player can only move to the next cell if it is empty (0) or the finish point (F).
+ * <p>
+ * The player cannot move to the cell if it is a rock.
+ * <p>
+ * The player cannot move out of the maze.
+ * <p>
+ * The player cannot move diagonally.
+ * <p>
+ * The player can see the visual traveled path of the maze.
+ * <p>
+ * The player can see the time taken to execute the algorithm.
+ * <p>
+ * The player can see the path from the start to the finish.
  */
 public class Main {
     private static final int[][] DIRECTIONS = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}; // Up, Down, Right, Left directions respectively.
