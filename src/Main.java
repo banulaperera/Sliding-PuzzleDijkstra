@@ -23,13 +23,14 @@ public class Main {
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.println("\nWelcome to the Sliding Puzzle Game!");
-            System.out.println("\nPlease share the file path with me:");
+            System.out.print("Please share the file path with me: ");
             String path = scanner.nextLine();
 
             try {
                 // Read the maze from the file.
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
                 String line;
+                // Variables to store the height, width, start point, and finish point of the maze.
                 int heightOfTheMaze = 0, widthOfTheMaze = 0;
                 int startPointY = 0, startPointX = 0, finishPointY = 0, finishPointX = 0;
                 boolean isValid = true, startPointFound = false, finishPointFound = false;
@@ -79,58 +80,56 @@ public class Main {
             } catch (FileNotFoundException e) {
                 System.out.println("\nFile not found. Please check the file path and try again.");
             } catch (Exception e) {
-                System.out.println("\nAn error occurred while reading the file. Please try again.");
+                System.out.println(e.getMessage());
             }
         }
     }
 
-    /*
-     * Dijkstra's algorithm to find the shortest path from the start to the finish.
-     * @param maze The maze to traverse.
-     * @param startX The x-coordinate of the starting point.
-     * @param startY The y-coordinate of the starting point.
-     * @param finishX The x-coordinate of the finish point.
-     * @param finishY The y-coordinate of the finish point.
-     * print the path from start to finish and time taken to execute the algorithm.
+    /**
+     * Dijkstra's algorithm to find the shortest path from the start point "S" to the finish point "F".
+     *
+     * @param maze    The maze.
+     * @param startX  The x-coordinate of the start point "S".
+     * @param startY  The y-coordinate of the start point "S".
+     * @param finishX The x-coordinate of the finish point "F".
+     * @param finishY The y-coordinate of the finish point "F".
      */
     public static void dijkstra(String[][] maze, int startX, int startY, int finishX, int finishY) {
         Instant start = Instant.now(); // Get the start time to execute the Dijkstra's algorithm.
         Node[][] nodes = new Node[maze.length][maze[0].length];
 
-        // Initialize the nodes by removing the wall '0'.
-        // Initialize the nodes by removing the wall '0'.
         for (int y = 0; y < maze.length; y++) {
             for (int x = 0; x < maze[0].length; x++) {
                 nodes[y][x] = new Node(x, y, Integer.MAX_VALUE, null, maze[y][x].equals("0"));
             }
         }
 
-        // Initialize the start node by changing the distance of the start node 0.
+        // Initialize the start node by assigning the distance of the start node 0.
         PriorityQueue<Node> queue = new PriorityQueue<>(Comparator.comparingInt(node -> node.distance));
         nodes[startY][startX].distance = 0;
         queue.add(nodes[startY][startX]);
-        Node[][] visitedArray = new Node[maze.length][maze[0].length];
+        Node[][] visitedArray = new Node[maze.length][maze[0].length]; // To keep track of the visited nodes.
 
-        // Filling the queue by comparing the distances of the nodes.
+        // Traverse the maze using Dijkstra's algorithm.
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            visitedArray[current.y][current.x] = current;
+            visitedArray[current.y][current.x] = current; // Mark the current node as visited.
+
             for (Node neighbor : getNeighbors(current, nodes, maze)) {
                 if (visitedArray[neighbor.y][neighbor.x] == null) {
-                    queue.remove(neighbor); // Remove the neighbor from the queue to update the distance.
-                    neighbor.distance = current.distance + neighbor.distance;
-                    neighbor.previous = current;
+                    neighbor.distance = current.distance + neighbor.distance; // Update the distance of the neighbor.
+                    neighbor.previous = current; // Set the parent node of the neighbor.
                     queue.add(neighbor);
                 }
             }
         }
 
-        // Print the path from the start to the finish.
+        // Print the path from start to the finish.
         if (nodes[finishY][finishX].distance != Integer.MAX_VALUE) {
             List<Node> path = new ArrayList<>();
             Node current = nodes[finishY][finishX];
 
-            // Get the path from the finish to the start.
+            // Get the path from finish to start.
             while (current != null) {
                 path.add(current);
                 current = current.previous;
@@ -138,22 +137,32 @@ public class Main {
             Instant end = Instant.now(); // Get the end time to execute the Dijkstra's algorithm.
             Collections.reverse(path); // Reverse the path to get the path from the start to the finish.
             printPath(path);
-//            visualPath(path, maze);
-            System.out.println("\nTime taken to execute the algorithm: " + (end.toEpochMilli() - start.toEpochMilli()) + " milliseconds."); // Print the time taken to execute the algorithm.
+            System.out.println("Time taken to execute the algorithm: " + (end.toEpochMilli() - start.toEpochMilli()) + " milliseconds."); // Print the time taken to execute the algorithm.
+            System.out.print("\nDo you want to see the visual traveled path of the maze(Y/N)?: ");
+            try (Scanner scanner = new Scanner(System.in)) {
+                String choice = scanner.nextLine();
+                if (choice.equalsIgnoreCase("Y")) {
+                    visualPath(path, maze);
+                }
+            }
+            System.out.println("\nThank you for playing the Sliding Puzzle Game!");
         } else {
             System.out.println("No path found.");
         }
     }
 
-    /*
-     * Get the neighbors of the current node.
-     * @param node The current node.
+    /**
+     * Get the neighbors with their respective distance of the current node.
+     *
+     * @param node  The current node.
      * @param nodes The nodes in the maze.
-     * @return The neighbors of the current node.
+     * @param maze  The maze.
+     * @return The list of neighbors of the current node.
      */
     public static List<Node> getNeighbors(Node node, Node[][] nodes, String[][] maze) {
         List<Node> neighbors = new ArrayList<>();
 
+        // Traverse in all four directions to get the neighbors.
         for (int[] direction : DIRECTIONS) {
             int x = node.x;
             int y = node.y;
@@ -169,6 +178,7 @@ public class Main {
                     break;
                 }
 
+                // Break if the new position is the finish point.
                 if (maze[newY][newX].equals("F")) {
                     nodes[newY][newX].distance = distanceTravel;
                     neighbors.add(nodes[newY][newX]);
@@ -189,8 +199,9 @@ public class Main {
         return neighbors;
     }
 
-    /*
+    /**
      * Print the path from the start to the finish.
+     *
      * @param path The path from the start to the finish.
      */
     public static void printPath(List<Node> path) {
@@ -213,16 +224,19 @@ public class Main {
             }
         }
         System.out.println("Done!");
-        System.out.println("\n");
     }
 
+    /**
+     * Visualize the path in the maze.
+     *
+     * @param path The path from the start to the finish.
+     * @param maze The maze.
+     */
     public static void visualPath(List<Node> path, String[][] maze) {
-        int i = 1;
         // Mark the path in the maze.
         for (Node node : path) {
             if (maze[node.y][node.x].equals(".") || maze[node.y][node.x].equals("0")) {
-                maze[node.y][node.x] = String.valueOf(i);
-                i++;
+                maze[node.y][node.x] = "*";
             }
         }
 
