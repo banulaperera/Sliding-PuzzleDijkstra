@@ -106,18 +106,19 @@ public class Main {
         }
 
         // Initialize the start node by changing the distance of the start node 0.
-        PriorityQueue<Node> queue = new PriorityQueue<>();
+        PriorityQueue<Node> queue = new PriorityQueue<>(Comparator.comparingInt(node -> node.distance));
         nodes[startY][startX].distance = 0;
         queue.add(nodes[startY][startX]);
+        Node[][] visitedArray = new Node[maze.length][maze[0].length];
 
         // Filling the queue by comparing the distances of the nodes.
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            for (Node neighbor : getNeighbors(current, nodes)) {
-                int distance = current.distance + 1;
-                if (distance < neighbor.distance) {
-                    queue.remove(neighbor);
-                    neighbor.distance = distance;
+            visitedArray[current.y][current.x] = current;
+            for (Node neighbor : getNeighbors(current, nodes, maze)) {
+                if (visitedArray[neighbor.y][neighbor.x] == null) {
+                    queue.remove(neighbor); // Remove the neighbor from the queue to update the distance.
+                    neighbor.distance = current.distance + neighbor.distance;
                     neighbor.previous = current;
                     queue.add(neighbor);
                 }
@@ -137,7 +138,7 @@ public class Main {
             Instant end = Instant.now(); // Get the end time to execute the Dijkstra's algorithm.
             Collections.reverse(path); // Reverse the path to get the path from the start to the finish.
             printPath(path);
-            visualPath(path, maze);
+//            visualPath(path, maze);
             System.out.println("\nTime taken to execute the algorithm: " + (end.toEpochMilli() - start.toEpochMilli()) + " milliseconds."); // Print the time taken to execute the algorithm.
         } else {
             System.out.println("No path found.");
@@ -150,12 +151,13 @@ public class Main {
      * @param nodes The nodes in the maze.
      * @return The neighbors of the current node.
      */
-    public static List<Node> getNeighbors(Node node, Node[][] nodes) {
+    public static List<Node> getNeighbors(Node node, Node[][] nodes, String[][] maze) {
         List<Node> neighbors = new ArrayList<>();
 
         for (int[] direction : DIRECTIONS) {
             int x = node.x;
             int y = node.y;
+            int distanceTravel = 0;
 
             // Keep sliding in the chosen direction until hitting a wall or a rock.
             while (true) {
@@ -167,12 +169,19 @@ public class Main {
                     break;
                 }
 
+                if (maze[newY][newX].equals("F")) {
+                    nodes[newY][newX].distance = distanceTravel;
+                    neighbors.add(nodes[newY][newX]);
+                    break;
+                }
                 x = newX;
                 y = newY;
+                distanceTravel++;
             }
 
             // Add the final position to the neighbors.
             if (x != node.x || y != node.y) {
+                nodes[y][x].distance = distanceTravel;
                 neighbors.add(nodes[y][x]);
             }
         }
