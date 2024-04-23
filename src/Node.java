@@ -1,3 +1,6 @@
+/**
+ * Node class to represent a node in the grid
+ */
 public class Node implements Comparable<Node> {
     int x, y; // coordinates of the node
     int distance; // distance of the node

@@ -17,6 +17,9 @@ import java.io.FileReader;
 import java.time.Instant;
 import java.util.*;
 
+/**
+ * The Main class contains the main method to execute the Sliding Puzzle Game.
+ */
 public class Main {
     private static final int[][] DIRECTIONS = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}; // Up, Down, Right, Left directions respectively.
 
@@ -80,7 +83,7 @@ public class Main {
             } catch (FileNotFoundException e) {
                 System.out.println("\nFile not found. Please check the file path and try again.");
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.out.println("\nAn error occurred while reading the file. Please try again.");
             }
         }
     }
@@ -98,6 +101,7 @@ public class Main {
         Instant start = Instant.now(); // Get the start time to execute the Dijkstra's algorithm.
         Node[][] nodes = new Node[maze.length][maze[0].length];
 
+        // Initialize the nodes in the maze.
         for (int y = 0; y < maze.length; y++) {
             for (int x = 0; x < maze[0].length; x++) {
                 nodes[y][x] = new Node(x, y, Integer.MAX_VALUE, null, maze[y][x].equals("0"));
@@ -108,17 +112,23 @@ public class Main {
         PriorityQueue<Node> queue = new PriorityQueue<>(Comparator.comparingInt(node -> node.distance));
         nodes[startY][startX].distance = 0;
         queue.add(nodes[startY][startX]);
-        Node[][] visitedArray = new Node[maze.length][maze[0].length]; // To keep track of the visited nodes.
+        boolean[][] visited = new boolean[maze.length][maze[0].length];
 
         // Traverse the maze using Dijkstra's algorithm.
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            visitedArray[current.y][current.x] = current; // Mark the current node as visited.
+
+            // Skip this node if it has already been visited
+            if (visited[current.y][current.x]) {
+                continue;
+            }
+
+            visited[current.y][current.x] = true; // Mark the current node as visited
 
             for (Node neighbor : getNeighbors(current, nodes, maze)) {
-                if (visitedArray[neighbor.y][neighbor.x] == null) {
-                    neighbor.distance = current.distance + neighbor.distance; // Update the distance of the neighbor.
-                    neighbor.previous = current; // Set the parent node of the neighbor.
+                if (!visited[neighbor.y][neighbor.x]) {
+                    neighbor.distance = current.distance + neighbor.distance; // Update the distance of the neighbor
+                    neighbor.previous = current; // Set the parent node of the neighbor
                     queue.add(neighbor);
                 }
             }
@@ -161,6 +171,8 @@ public class Main {
      */
     public static List<Node> getNeighbors(Node node, Node[][] nodes, String[][] maze) {
         List<Node> neighbors = new ArrayList<>();
+        int mazeHeight = nodes.length;
+        int mazeWidth = nodes[0].length;
 
         // Traverse in all four directions to get the neighbors.
         for (int[] direction : DIRECTIONS) {
@@ -174,7 +186,7 @@ public class Main {
                 int newY = y + direction[1];
 
                 // Break if the new position is out of bounds or is a rock.
-                if (newX < 0 || newX >= nodes[0].length || newY < 0 || newY >= nodes.length || nodes[newY][newX].isRock) {
+                if (newX < 0 || newX >= mazeWidth || newY < 0 || newY >= mazeHeight || nodes[newY][newX].isRock) {
                     break;
                 }
 
