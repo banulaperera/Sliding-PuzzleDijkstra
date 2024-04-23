@@ -1,16 +1,23 @@
 public class Node implements Comparable<Node> {
-    int x, y; // The x and y coordinates of the node.
-    int distance; // The distance from the start node to the current node.
-    Node previous; // The previous node in the path.
+    int x, y; // coordinates of the node
+    int distance; // distance of the node
+    Node previous; // parent node
+    boolean isRock; // check whether the node is a rock or not
 
-    public Node(int x, int y, int distance, Node previous) {
+    public Node(int x, int y, int distance, Node previous, boolean isRock) {
         this.x = x;
         this.y = y;
         this.distance = distance;
         this.previous = previous;
+        this.isRock = isRock;
     }
 
-    // Compare the distance of the current node to the distance of another node.
+    /**
+     * Compare the distance of the node
+     *
+     * @param other the other node to compare
+     * @return the comparison result
+     */
     @Override
     public int compareTo(Node other) {
         return Integer.compare(this.distance, other.distance);
